@@ -6,7 +6,7 @@
         <artifactId>mybatis-extender</artifactId>
         <groupId>org.ops4j.pax</groupId>
         <version>1.0-SNAPSHOT</version>
-        <relativePath>../MybatisExtender-Site/pom.xml</relativePath>
+        <relativePath>../mybatis-extender-parent/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
