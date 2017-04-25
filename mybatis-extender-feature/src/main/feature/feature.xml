@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<features name="mybatis-extender-repo" xlmns="http://karaf.apache.org/xmlns/features/v1.4.0">
+
+    <feature name="mybatis-extender" version="${project.version}">
+        <bundle>mvn:org.ops4j.pax/mybatis-extender-api/${project.version}</bundle>
+        <bundle>mvn:org.ops4j.pax/mybatis-extender-runtime/${project.version}</bundle>
+    </feature>
+
+    <feature name="mybatis-extender-sample" version="${project.version}">
+
+
+    </feature>
+
+
+</features>

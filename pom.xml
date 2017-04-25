@@ -14,6 +14,14 @@
     </site>
   </distributionManagement>
 
+  <modules>
+    <module>mybatis-extender-api</module>
+    <module>mybatis-extender-runtime</module>
+    <module>mybatis-extender-feature</module>
+    <module>mybatis-extender-sample</module>
+    <module>mybatis-extender-integrationtest</module>
+  </modules>
+
   <dependencyManagement>
     <dependencies>
       <dependency>

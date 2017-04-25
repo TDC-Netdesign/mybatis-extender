@@ -1,2 +1,6 @@
 .idea/
 *.iml
+mybatis-extender-runtime/target/
+mybatis-extender-feature/target/
+mybatis-extender-api/target/
+mybatis-extender-sample/target/
