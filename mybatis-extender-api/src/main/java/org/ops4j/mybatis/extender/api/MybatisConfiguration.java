@@ -1,4 +1,4 @@
-package org.ops4j.pax;
+package org.ops4j.mybatis.extender.api;
 
 import java.util.List;
 

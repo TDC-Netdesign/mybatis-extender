@@ -22,6 +22,18 @@
             <artifactId>org.osgi.compendium</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax</groupId>
+            <artifactId>mybatis-extender-api</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <scope>provided</scope>
+            <version>2.4.1</version>
+        </dependency>
 
 
     </dependencies>
@@ -42,6 +54,18 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
                 <version>3.3.0</version>
+                <configuration>
+                    <instructions>
+                        <Export-Package>org.ops4j.mybatis.extender.sample.mappers</Export-Package>
+                        <Import-Package>
+                            org.apache.logging.log4j; version="2,3)"; provider=paxlogging,
+                            *
+                        </Import-Package>
+
+                    </instructions>
+
+                </configuration>
+
             </plugin>
         </plugins>
     </build>

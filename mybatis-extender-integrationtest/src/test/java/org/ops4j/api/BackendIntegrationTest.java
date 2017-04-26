@@ -1,5 +1,6 @@
-package dk.netdesign.osgidialer.integrationtest;
+package org.ops4j.api;
 
+import org.apache.karaf.features.BootFinished;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -37,15 +38,15 @@ public class BackendIntegrationTest {
 
 
                 karafDistributionConfiguration().frameworkUrl(maven().groupId("org.apache.karaf").artifactId("apache-karaf")
-                        .type("zip").version("4.1.1"))
+                        .type("zip").version("4.0.9"))
                         .unpackDirectory(new File("target/paxexam/unpack/"))
                 ,CoreOptions.systemTimeout(360000),
                 configureConsole().ignoreLocalConsole(),
-                logLevel(LogLevel.DEBUG),
+                logLevel(LogLevel.INFO),
 
 
                 features(
-                        maven().groupId("mybatis-extender")
+                        maven().groupId("org.ops4j.pax")
                                 .artifactId("mybatis-extender-feature").type("xml")
                                 .classifier("features").version("1.0-SNAPSHOT")
                        ,"mybatis-extender","mybatis-extender-sample","webconsole"),
@@ -53,15 +54,10 @@ public class BackendIntegrationTest {
                 ;
     }
 
-    //    @Test
-//    public void businessServiceSimpleCall() throws dk.netdesign.common.exception.CiscoAPIException, dk.netdesign.common.exception.FailedSecurityException {
-//        businessService.getAllCampaigns();
-//        
-//    }
 
-    @Category(DontRunOnJenkins.class)
     @Test
     public void dontStopTillYouGetEnough() throws IOException {
+        System.out.print("ready and awaiting command!");
         System.in.read();
 
     }
