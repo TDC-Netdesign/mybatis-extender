@@ -21,20 +21,22 @@
 
     <dependencies>
 
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.core</artifactId>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.compendium</artifactId>
-                <scope>provided</scope>
-            </dependency>
-
-
-
-
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.testing.osgi-mock</artifactId>
+            <version>2.2.4</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.ops4j.pax</groupId>
@@ -120,6 +122,11 @@
             <artifactId>log4j-api</artifactId>
             <scope>test</scope>
             <version>2.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax</groupId>
+            <artifactId>mybatis-extender-sample</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
 
     </dependencies>
