@@ -29,7 +29,7 @@ import static net.bytebuddy.matcher.ElementMatchers.any;
 /**
  * Created by nmw on 27-04-2017.
  */
-public class MybatisExtenderServiceListener  implements ServiceListener {
+public class MybatisExtenderServiceListener implements ServiceListener {
 
     private static final Logger LOGGER = LogManager.getLogger();
     private BundleContext ctx;
@@ -41,44 +41,43 @@ public class MybatisExtenderServiceListener  implements ServiceListener {
 
     @Override
     public void serviceChanged(ServiceEvent serviceEvent) {
-        LOGGER.info("got service event {}",serviceEvent.getType());
+        LOGGER.info("got service event {}", serviceEvent.getType());
 
-        MybatisConfiguration service =(MybatisConfiguration) ctx.getService(serviceEvent.getServiceReference());
+        MybatisConfiguration service = (MybatisConfiguration) ctx.getService(serviceEvent.getServiceReference());
 
-        switch (serviceEvent.getType()){
+        switch (serviceEvent.getType()) {
 
             case ServiceEvent.REGISTERED:
                 //Register mappers
 
-                Configuration configuration =null;
-                List<Interceptor> interceptorList=new ArrayList<>();
-                if(service.getMappers().size()>0)
-                {
+                Configuration configuration = null;
+                List<Interceptor> interceptorList = new ArrayList<>();
+                if (service.getMappers().size() > 0) {
                     //setup mybatis context
                     Environment environment = new Environment(service.getClass().getCanonicalName(), new JdbcTransactionFactory(), getDataSource(service));
                     configuration = new Configuration(environment);
 
 
                 }
+                List<Object> proxyMappers = new ArrayList<>();
 
-                for (Class clazz:service.getMappers()) {
-                    LOGGER.info("registering {}",clazz.getCanonicalName());
+                for (Class clazz : service.getMappers()) {
+                    LOGGER.info("registering {}", clazz.getCanonicalName());
                     configuration.addMapper(clazz);
 
                     ByteBuddy bb = new ByteBuddy();
-                    Interceptor interceptor=null;
-                    interceptor=new Interceptor(clazz);
+                    Interceptor interceptor = null;
+                    interceptor = new Interceptor(clazz);
                     interceptorList.add(interceptor);
                     Class<?> clz = bb
-                            .subclass(clazz).name("MybatisExtenderMapper"+clazz.getName())
+                            .subclass(clazz).name("MybatisExtenderRuntime_" + clazz.getName())
                             .method(any()).intercept(MethodDelegation.to(interceptor))
                             .make()
-                            .load(new MultipleParentClassLoader(Arrays.asList( clazz.getClassLoader(),this.getClass().getClassLoader())), ClassLoadingStrategy.Default.WRAPPER)
+                            .load(new MultipleParentClassLoader(Arrays.asList(clazz.getClassLoader(), this.getClass().getClassLoader())), ClassLoadingStrategy.Default.WRAPPER)
                             .getLoaded();
                     try {
                         Object test = clz.newInstance();
-                        ServiceRegistration<?> serviceRegistration = ctx.registerService(clazz.getName(), test, null);
-                        LOGGER.info("registerered {}",test.getClass().getCanonicalName());
+                        proxyMappers.add(test);
                     } catch (InstantiationException e) {
                         LOGGER.error(e);
                     } catch (IllegalAccessException e) {
@@ -88,22 +87,31 @@ public class MybatisExtenderServiceListener  implements ServiceListener {
                 SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
                 interceptorList.stream().forEach(interceptor -> interceptor.setSqlSessionFactory(sqlSessionFactory));
 
+                proxyMappers.forEach(o -> {
+                    Class[] implementedInterfaces = o.getClass().getInterfaces();
+                    LOGGER.info("class implements {} interfaces, interfaces are {}", implementedInterfaces.length,implementedInterfaces.toString());
+                    ServiceRegistration<?> serviceRegistration = ctx.registerService(implementedInterfaces[0].getCanonicalName(), o, null);
+                    LOGGER.info("registerered {} as service {}", o.getClass().getCanonicalName(), implementedInterfaces[0].getClass().getCanonicalName());
+                });
+                ;
+
 
                 break;
             case ServiceEvent.UNREGISTERING:
                 //Unregister mappers
-                for (Class clazz:service.getMappers()) {
+                for (Class clazz : service.getMappers()) {
 
-                    LOGGER.info("unregistering {}",clazz.getCanonicalName());
+                    LOGGER.info("unregistering {}", clazz.getCanonicalName());
                 }
                 break;
         }
 
 
-
     }
+
     private DataSource getDataSource(MybatisConfiguration service) {
         HikariConfig config = new HikariConfig();
+        config.setDriverClassName(service.getDriver().getCanonicalName());
         config.setJdbcUrl(service.getJDBCUrl());
         config.setUsername(service.getUser());
         config.setPassword(service.getPassword());

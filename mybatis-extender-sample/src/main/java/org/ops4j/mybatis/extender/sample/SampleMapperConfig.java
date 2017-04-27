@@ -22,7 +22,7 @@ public class SampleMapperConfig implements MybatisConfiguration{
 
     @Override
     public String getJDBCUrl() {
-        return null;
+        return "jdbc:hsqldb:mem:sample";
     }
 
     @Override
@@ -37,6 +37,6 @@ public class SampleMapperConfig implements MybatisConfiguration{
 
     @Override
     public Class getDriver() {
-        return null;
+        return org.hsqldb.jdbcDriver.class;
     }
 }
