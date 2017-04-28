@@ -1,19 +1,11 @@
-package org.ops4j.api;
+package org.ops4j.mybatis.extender.runtime;
 
-import net.bytebuddy.ByteBuddy;
-import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
-import net.bytebuddy.implementation.MethodDelegation;
-import net.bytebuddy.implementation.bind.annotation.AllArguments;
-import net.bytebuddy.implementation.bind.annotation.Origin;
-import net.bytebuddy.implementation.bind.annotation.RuntimeType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ops4j.mybatis.extender.api.MybatisConfiguration;
 import org.osgi.framework.*;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-
-import static net.bytebuddy.matcher.ElementMatchers.any;
 
 /**
  * Created by nmw on 26-04-2017.

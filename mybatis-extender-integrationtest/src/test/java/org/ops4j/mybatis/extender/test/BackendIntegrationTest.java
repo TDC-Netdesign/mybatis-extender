@@ -1,4 +1,4 @@
-package org.ops4j.api;
+package org.ops4j.mybatis.extender.test;
 
 import org.apache.karaf.features.BootFinished;
 import org.junit.Test;

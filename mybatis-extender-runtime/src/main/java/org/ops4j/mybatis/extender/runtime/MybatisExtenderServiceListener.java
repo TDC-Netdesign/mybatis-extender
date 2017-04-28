@@ -1,4 +1,4 @@
-package org.ops4j.api;
+package org.ops4j.mybatis.extender.runtime;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -6,6 +6,8 @@ import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.dynamic.loading.MultipleParentClassLoader;
 import net.bytebuddy.implementation.MethodDelegation;
+import org.apache.ibatis.io.ClassLoaderWrapper;
+import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -34,9 +36,13 @@ public class MybatisExtenderServiceListener implements ServiceListener {
     private static final Logger LOGGER = LogManager.getLogger();
     private BundleContext ctx;
 
+    private MultipleParentClassLoader multipleParentClassLoader;
+
     public MybatisExtenderServiceListener(BundleContext ctx) {
 
         this.ctx = ctx;
+        multipleParentClassLoader=new MultipleParentClassLoader(Arrays.asList(this.getClass().getClassLoader()));
+
     }
 
     @Override
@@ -57,6 +63,9 @@ public class MybatisExtenderServiceListener implements ServiceListener {
                     Environment environment = new Environment(service.getClass().getCanonicalName(), new JdbcTransactionFactory(), getDataSource(service));
                     configuration = new Configuration(environment);
 
+                    //TODO maintain a registry of class loaders and add or remove them as services come and go.
+//                    multipleParentClassLoader= new MultipleParentClassLoader(Arrays.asList(this.getClass().getClassLoader(),service.getClass().getClassLoader()));
+//                    Resources.setDefaultClassLoader(multipleParentClassLoader);
 
                 }
                 List<Object> proxyMappers = new ArrayList<>();
@@ -69,8 +78,7 @@ public class MybatisExtenderServiceListener implements ServiceListener {
                     Interceptor interceptor = null;
                     interceptor = new Interceptor(clazz);
                     interceptorList.add(interceptor);
-                    Class<?> clz = bb
-                            .subclass(clazz).name("MybatisExtenderRuntime_" + clazz.getName())
+                    Class<?> clz = bb.subclass(clazz).name("MybatisExtenderRuntime_" + clazz.getName())
                             .method(any()).intercept(MethodDelegation.to(interceptor))
                             .make()
                             .load(new MultipleParentClassLoader(Arrays.asList(clazz.getClassLoader(), this.getClass().getClassLoader())), ClassLoadingStrategy.Default.WRAPPER)
@@ -85,6 +93,8 @@ public class MybatisExtenderServiceListener implements ServiceListener {
                     }
                 }
                 SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
+
+
                 interceptorList.stream().forEach(interceptor -> interceptor.setSqlSessionFactory(sqlSessionFactory));
 
                 proxyMappers.forEach(o -> {
