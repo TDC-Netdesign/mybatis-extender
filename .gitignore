@@ -5,3 +5,6 @@ mybatis-extender-feature/target/
 mybatis-extender-api/target/
 mybatis-extender-sample/target/
 mybatis-extender-integrationtest/target/
+mybatis-extender-sample-sqllite/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
+mybatis-extender-sample-sqllite/target/
+mybatis-extender-sample-hsql/target/

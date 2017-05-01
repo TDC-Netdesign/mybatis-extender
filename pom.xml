@@ -18,7 +18,8 @@
     <module>mybatis-extender-api</module>
     <module>mybatis-extender-runtime</module>
     <module>mybatis-extender-feature</module>
-    <module>mybatis-extender-sample</module>
+    <module>mybatis-extender-sample-hsql</module>
+    <module>mybatis-extender-sample-sqllite</module>
     <module>mybatis-extender-integrationtest</module>
   </modules>
 
