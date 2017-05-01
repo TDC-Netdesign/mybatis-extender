@@ -24,6 +24,7 @@ import org.osgi.framework.ServiceRegistration;
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import static net.bytebuddy.matcher.ElementMatchers.any;
@@ -37,6 +38,8 @@ public class MybatisExtenderServiceListener implements ServiceListener {
     private BundleContext ctx;
 
     private MultipleParentClassLoader multipleParentClassLoader;
+
+    private HashMap<MybatisConfiguration,List<ServiceRegistration<?>>> serviceRegistry=new HashMap<>();
 
     public MybatisExtenderServiceListener(BundleContext ctx) {
 
@@ -75,6 +78,7 @@ public class MybatisExtenderServiceListener implements ServiceListener {
                     configuration.addMapper(clazz);
 
                     ByteBuddy bb = new ByteBuddy();
+
                     Interceptor interceptor = null;
                     interceptor = new Interceptor(clazz);
                     interceptorList.add(interceptor);
@@ -97,22 +101,35 @@ public class MybatisExtenderServiceListener implements ServiceListener {
 
                 interceptorList.stream().forEach(interceptor -> interceptor.setSqlSessionFactory(sqlSessionFactory));
 
+                List<ServiceRegistration<?>> serviceRegistrationList=new ArrayList<>();
                 proxyMappers.forEach(o -> {
                     Class[] implementedInterfaces = o.getClass().getInterfaces();
                     LOGGER.info("class implements {} interfaces, interfaces are {}", implementedInterfaces.length,implementedInterfaces.toString());
                     ServiceRegistration<?> serviceRegistration = ctx.registerService(implementedInterfaces[0].getCanonicalName(), o, null);
+                    serviceRegistrationList.add(serviceRegistration);
                     LOGGER.info("registerered {} as service {}", o.getClass().getCanonicalName(), implementedInterfaces[0].getClass().getCanonicalName());
                 });
                 ;
+                serviceRegistry.put(service,serviceRegistrationList);
 
 
                 break;
             case ServiceEvent.UNREGISTERING:
                 //Unregister mappers
-                for (Class clazz : service.getMappers()) {
+                serviceRegistry.remove(service).stream().forEach(
+                  serviceRegistration -> {
+                      try {
+                          serviceRegistration.unregister() ;
+                          LOGGER.info("unregistering {}", service.getClass().getCanonicalName());
+                      }catch (RuntimeException ex){
+                          LOGGER.error(" caugth an RuntimeException {}, unregistering {}", service.getClass().getCanonicalName());
+                      }
+                  }
+                );
 
-                    LOGGER.info("unregistering {}", clazz.getCanonicalName());
-                }
+
+
+
                 break;
         }
 
