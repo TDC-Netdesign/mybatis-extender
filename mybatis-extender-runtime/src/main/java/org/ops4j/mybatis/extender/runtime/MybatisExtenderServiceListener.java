@@ -13,6 +13,7 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
+import org.apache.ibatis.type.TypeHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ops4j.mybatis.extender.api.MybatisConfiguration;
@@ -39,12 +40,12 @@ public class MybatisExtenderServiceListener implements ServiceListener {
 
     private MultipleParentClassLoader multipleParentClassLoader;
 
-    private HashMap<MybatisConfiguration,List<ServiceRegistration<?>>> serviceRegistry=new HashMap<>();
+    private HashMap<MybatisConfiguration, List<ServiceRegistration<?>>> serviceRegistry = new HashMap<>();
 
     public MybatisExtenderServiceListener(BundleContext ctx) {
 
         this.ctx = ctx;
-        multipleParentClassLoader=new MultipleParentClassLoader(Arrays.asList(this.getClass().getClassLoader()));
+        multipleParentClassLoader = new MultipleParentClassLoader(Arrays.asList(this.getClass().getClassLoader()));
 
     }
 
@@ -59,16 +60,17 @@ public class MybatisExtenderServiceListener implements ServiceListener {
             case ServiceEvent.REGISTERED:
                 //Register mappers
 
-                Configuration configuration = null;
+
                 List<Interceptor> interceptorList = new ArrayList<>();
+                Environment environment = new Environment(service.getClass().getCanonicalName(), new JdbcTransactionFactory(), getDataSource(service));
+                final Configuration configuration = new Configuration(environment);
+
                 if (service.getMappers().size() > 0) {
                     //setup mybatis context
-                    Environment environment = new Environment(service.getClass().getCanonicalName(), new JdbcTransactionFactory(), getDataSource(service));
-                    configuration = new Configuration(environment);
-
-                    //TODO maintain a registry of class loaders and add or remove them as services come and go.
-//                    multipleParentClassLoader= new MultipleParentClassLoader(Arrays.asList(this.getClass().getClassLoader(),service.getClass().getClassLoader()));
-//                    Resources.setDefaultClassLoader(multipleParentClassLoader);
+                    service.getTypeHandlers().entrySet().forEach(classTypeHandlerEntry -> {
+                                configuration.getTypeHandlerRegistry().register(classTypeHandlerEntry.getKey(), classTypeHandlerEntry.getValue());
+                            }
+                    );
 
                 }
                 List<Object> proxyMappers = new ArrayList<>();
@@ -101,33 +103,31 @@ public class MybatisExtenderServiceListener implements ServiceListener {
 
                 interceptorList.stream().forEach(interceptor -> interceptor.setSqlSessionFactory(sqlSessionFactory));
 
-                List<ServiceRegistration<?>> serviceRegistrationList=new ArrayList<>();
+                List<ServiceRegistration<?>> serviceRegistrationList = new ArrayList<>();
                 proxyMappers.forEach(o -> {
                     Class[] implementedInterfaces = o.getClass().getInterfaces();
-                    LOGGER.info("class implements {} interfaces, interfaces are {}", implementedInterfaces.length,implementedInterfaces.toString());
+                    LOGGER.info("class implements {} interfaces, interfaces are {}", implementedInterfaces.length, implementedInterfaces.toString());
                     ServiceRegistration<?> serviceRegistration = ctx.registerService(implementedInterfaces[0].getCanonicalName(), o, null);
                     serviceRegistrationList.add(serviceRegistration);
                     LOGGER.info("registerered {} as service {}", o.getClass().getCanonicalName(), implementedInterfaces[0].getClass().getCanonicalName());
                 });
                 ;
-                serviceRegistry.put(service,serviceRegistrationList);
+                serviceRegistry.put(service, serviceRegistrationList);
 
 
                 break;
             case ServiceEvent.UNREGISTERING:
                 //Unregister mappers
                 serviceRegistry.remove(service).stream().forEach(
-                  serviceRegistration -> {
-                      try {
-                          serviceRegistration.unregister() ;
-                          LOGGER.info("unregistering {}", service.getClass().getCanonicalName());
-                      }catch (RuntimeException ex){
-                          LOGGER.error(" caugth an RuntimeException {}, unregistering {}", service.getClass().getCanonicalName());
-                      }
-                  }
+                        serviceRegistration -> {
+                            try {
+                                serviceRegistration.unregister();
+                                LOGGER.info("unregistering {}", service.getClass().getCanonicalName());
+                            } catch (RuntimeException ex) {
+                                LOGGER.error(" caugth an RuntimeException {}, unregistering {}", service.getClass().getCanonicalName());
+                            }
+                        }
                 );
-
-
 
 
                 break;
