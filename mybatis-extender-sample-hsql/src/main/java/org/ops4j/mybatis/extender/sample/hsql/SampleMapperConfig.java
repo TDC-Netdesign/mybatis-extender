@@ -1,5 +1,6 @@
 package org.ops4j.mybatis.extender.sample.hsql;
 
+import org.apache.ibatis.type.TypeHandler;
 import org.ops4j.mybatis.extender.api.MybatisConfiguration;
 import org.ops4j.mybatis.extender.sample.hsql.mappers.SampleAnnotationMapper;
 import org.ops4j.mybatis.extender.sample.hsql.mappers.SampleXMLBasedMapper;
@@ -7,6 +8,7 @@ import org.osgi.service.component.annotations.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by nmw on 26-04-2017.
@@ -20,6 +22,11 @@ public class SampleMapperConfig implements MybatisConfiguration{
         myMappers.add(SampleXMLBasedMapper.class);
 
         return myMappers;
+    }
+
+    @Override
+    public Map<Class, TypeHandler> getTypeHandlers() {
+        return null;
     }
 
     @Override

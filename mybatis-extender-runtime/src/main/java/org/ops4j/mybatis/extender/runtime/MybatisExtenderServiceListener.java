@@ -67,11 +67,13 @@ public class MybatisExtenderServiceListener implements ServiceListener {
 
                 if (service.getMappers().size() > 0) {
                     //setup mybatis context
-                    service.getTypeHandlers().entrySet().forEach(classTypeHandlerEntry -> {
-                                configuration.getTypeHandlerRegistry().register(classTypeHandlerEntry.getKey(), classTypeHandlerEntry.getValue());
-                            }
-                    );
+                    if (service.getTypeHandlers() != null) {
+                        service.getTypeHandlers().entrySet().forEach(classTypeHandlerEntry -> {
+                                    configuration.getTypeHandlerRegistry().register(classTypeHandlerEntry.getKey(), classTypeHandlerEntry.getValue());
+                                }
 
+                        );
+                    }
                 }
                 List<Object> proxyMappers = new ArrayList<>();
 
