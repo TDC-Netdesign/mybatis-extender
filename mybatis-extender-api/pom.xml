@@ -3,13 +3,13 @@
     <parent>
         <artifactId>mybatis-extender-parent</artifactId>
         <groupId>org.ops4j.pax</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>mybatis-extender-api</artifactId>
     <packaging>bundle</packaging>
-    <version>1.0-SNAPSHOT</version>
+
 
     <name>mybatis-extender-api</name>
     <url>http://maven.apache.org</url>

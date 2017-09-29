@@ -38,9 +38,8 @@ public class Interceptor {
         Method methodInstance = mapper.getClass().getDeclaredMethod(method.getName(),method.getParameterTypes());
 
         Object invoke = methodInstance.invoke(mapper, args);
+        sqlSession.commit();
         sqlSession.close();
-
-
 
         return invoke;
     }
