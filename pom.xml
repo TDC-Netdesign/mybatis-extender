@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.ops4j.pax</groupId>
+	<groupId>dk.netdesign</groupId>
 	<artifactId>mybatis-extender-parent</artifactId>
 	<version>1.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
@@ -55,13 +55,13 @@
 				<version>5.0.0</version>
 			</dependency>
 			<dependency>
-				<groupId>org.ops4j.pax</groupId>
+				<groupId>dk.netdesign</groupId>
 				<artifactId>mybatis-extender-api</artifactId>
 				<version>1.0.1-SNAPSHOT</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.ops4j.pax</groupId>
+				<groupId>dk.netdesign</groupId>
 				<artifactId>mybatis-extender-feature</artifactId>
 				<version>1.0.1-SNAPSHOT</version>
 				<scope>provided</scope>
@@ -69,25 +69,25 @@
 				<classifier>features</classifier>
 			</dependency>
 			<dependency>
-				<groupId>org.ops4j.pax</groupId>
+				<groupId>dk.netdesign</groupId>
 				<artifactId>mybatis-extender-integrationtest</artifactId>
 				<version>1.0.1-SNAPSHOT</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.ops4j.pax</groupId>
+				<groupId>dk.netdesign</groupId>
 				<artifactId>mybatis-extender-runtime</artifactId>
 				<version>1.0.1-SNAPSHOT</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.ops4j.pax</groupId>
+				<groupId>dk.netdesign</groupId>
 				<artifactId>mybatis-extender-sample-hsql</artifactId>
 				<version>1.0.1-SNAPSHOT</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.ops4j.pax</groupId>
+				<groupId>dk.netdesign</groupId>
 				<artifactId>mybatis-extender-sample-sqllite</artifactId>
 				<version>1.0.1-SNAPSHOT</version>
 				<scope>provided</scope>

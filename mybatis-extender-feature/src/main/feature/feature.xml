@@ -13,16 +13,16 @@
         <feature>mybatis-extender-raw-mybatis</feature>
         <bundle>mvn:net.bytebuddy/byte-buddy/1.6.9</bundle>
 
-        <bundle>mvn:org.ops4j.pax/mybatis-extender-api/${project.version}</bundle>
-        <bundle>mvn:org.ops4j.pax/mybatis-extender-runtime/${project.version}</bundle>
+        <bundle>mvn:dk.netdesign/mybatis-extender-api/${project.version}</bundle>
+        <bundle>mvn:dk.netdesign/mybatis-extender-runtime/${project.version}</bundle>
     </feature>
 
     <feature name="mybatis-extender-sample" version="${project.version}">
         <bundle>mvn:org.hsqldb/hsqldb/2.4.0</bundle>
-        <bundle>mvn:org.ops4j.pax/mybatis-extender-sample-hsql/${project.version}</bundle>
+        <bundle>mvn:dk.netdesign/mybatis-extender-sample-hsql/${project.version}</bundle>
 
         <bundle>mvn:org.xerial/sqlite-jdbc/3.16.1</bundle>
-        <bundle>mvn:org.ops4j.pax/mybatis-extender-sample-sqllite/${project.version}</bundle>
+        <bundle>mvn:dk.netdesign/mybatis-extender-sample-sqllite/${project.version}</bundle>
 
     </feature>
 

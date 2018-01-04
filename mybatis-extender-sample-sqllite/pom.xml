@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>mybatis-extender-parent</artifactId>
-        <groupId>org.ops4j.pax</groupId>
+        <groupId>dk.netdesign</groupId>
         <version>1.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -28,7 +28,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.ops4j.pax</groupId>
+            <groupId>dk.netdesign</groupId>
             <artifactId>mybatis-extender-api</artifactId>
             <scope>provided</scope>
         </dependency>
@@ -66,7 +66,7 @@
                 <version>3.3.0</version>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.ops4j.mybatis.extender.sample.sqllite.mappers</Export-Package>
+                        <Export-Package>dk.netdesign.mybatis.extender.sample.sqllite.mappers</Export-Package>
                         <Import-Package>
                             org.apache.logging.log4j; version="2,3)"; provider=paxlogging,
                             *
