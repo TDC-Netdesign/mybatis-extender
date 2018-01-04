@@ -6,13 +6,13 @@
   <artifactId>mybatis-extender-parent</artifactId>
   <version>1.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
-
-  <distributionManagement>
-    <site>
-      <id>website</id>
-      <url>scp://webhost.company.com/www/website</url>
-    </site>
-  </distributionManagement>
+  
+  <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
 
   <modules>
     <module>mybatis-extender-api</module>
@@ -22,6 +22,23 @@
     <module>mybatis-extender-sample-sqllite</module>
     <module>mybatis-extender-integrationtest</module>
   </modules>
+  
+  <distributionManagement>  
+        <repository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>ossrhStage</id>  
+            <name>Release stage repository</name> 
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+            <layout>default</layout>
+        </repository>
+        <snapshotRepository>
+            <uniqueVersion>true</uniqueVersion>
+            <id>ossrhSnapshot</id>  
+            <name>Snapshot repository</name> 
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <layout>default</layout>
+        </snapshotRepository>
+    </distributionManagement>
 
   <dependencyManagement>
     <dependencies>
@@ -39,6 +56,46 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+  
+  <profiles>
+        <profile>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>env.BUILD_NUMBER</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <keyname>${gpg.keyname}</keyname>
+                                    <passphraseServerId>${gpg.keyname}</passphraseServerId>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+	
+	<scm>
+        <connection>scm:git:git@github.com:nmwael/mybatis-extender.git</connection>
+        <developerConnection>scm:git:git@github.com:nmwael/mybatis-extender.git</developerConnection>
+        <url>https://github.com/nmwael/mybatis-extender</url>
+        <tag>HEAD</tag>
+    </scm>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
