@@ -91,9 +91,9 @@
     </profiles>
 	
 	<scm>
-        <connection>scm:git:git@github.com:nmwael/mybatis-extender.git</connection>
-        <developerConnection>scm:git:git@github.com:nmwael/mybatis-extender.git</developerConnection>
-        <url>https://github.com/nmwael/mybatis-extender</url>
+        <connection>scm:git:git@github.com:TDC-Netdesign/mybatis-extender.git</connection>
+        <developerConnection>scm:git:git@github.com:TDC-Netdesign/mybatis-extender.git</developerConnection>
+        <url>https://github.com/TDC-Netdesign/mybatis-extender</url>
         <tag>HEAD</tag>
     </scm>
 
