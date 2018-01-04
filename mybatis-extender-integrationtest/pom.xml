@@ -40,7 +40,6 @@
         <dependency>
             <groupId>org.ops4j.pax</groupId>
             <artifactId>mybatis-extender-feature</artifactId>
-            <version>${project.version}</version>
             <scope>provided</scope>
             <type>xml</type>
             <classifier>features</classifier>
@@ -124,13 +123,14 @@
         <dependency>
             <groupId>org.ops4j.pax</groupId>
             <artifactId>mybatis-extender-sample-sqllite</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax</groupId>
             <artifactId>mybatis-extender-sample-hsql</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.ops4j.pax</groupId>
+            <artifactId>mybatis-extender-runtime</artifactId>
+        </dependency>
     </dependencies>
 </project>

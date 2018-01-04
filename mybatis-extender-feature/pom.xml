@@ -21,12 +21,10 @@
     <dependency>
       <groupId>org.ops4j.pax</groupId>
       <artifactId>mybatis-extender-api</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.ops4j.pax</groupId>
       <artifactId>mybatis-extender-runtime</artifactId>
-      <version>${project.version}</version>
     </dependency>
   </dependencies>
 
