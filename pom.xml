@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>dk.netdesign</groupId>
 	<artifactId>mybatis-extender-parent</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.1</version>
 	<packaging>pom</packaging>
 
 	<licenses>
@@ -57,13 +56,13 @@
 			<dependency>
 				<groupId>dk.netdesign</groupId>
 				<artifactId>mybatis-extender-api</artifactId>
-				<version>1.0.1-SNAPSHOT</version>
+				<version>1.0.1</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>dk.netdesign</groupId>
 				<artifactId>mybatis-extender-feature</artifactId>
-				<version>1.0.1-SNAPSHOT</version>
+				<version>1.0.1</version>
 				<scope>provided</scope>
 				<type>xml</type>
 				<classifier>features</classifier>
@@ -71,25 +70,25 @@
 			<dependency>
 				<groupId>dk.netdesign</groupId>
 				<artifactId>mybatis-extender-integrationtest</artifactId>
-				<version>1.0.1-SNAPSHOT</version>
+				<version>1.0.1</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>dk.netdesign</groupId>
 				<artifactId>mybatis-extender-runtime</artifactId>
-				<version>1.0.1-SNAPSHOT</version>
+				<version>1.0.1</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>dk.netdesign</groupId>
 				<artifactId>mybatis-extender-sample-hsql</artifactId>
-				<version>1.0.1-SNAPSHOT</version>
+				<version>1.0.1</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>dk.netdesign</groupId>
 				<artifactId>mybatis-extender-sample-sqllite</artifactId>
-				<version>1.0.1-SNAPSHOT</version>
+				<version>1.0.1</version>
 				<scope>provided</scope>
 			</dependency>
 		</dependencies>
@@ -132,7 +131,7 @@
 		<connection>scm:git:git@github.com:TDC-Netdesign/mybatis-extender.git</connection>
 		<developerConnection>scm:git:git@github.com:TDC-Netdesign/mybatis-extender.git</developerConnection>
 		<url>https://github.com/TDC-Netdesign/mybatis-extender</url>
-		<tag>HEAD</tag>
+		<tag>mybatis-extender-parent-1.0.1</tag>
 	</scm>
 
 	<properties>
