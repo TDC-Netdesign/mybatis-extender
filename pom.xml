@@ -5,6 +5,12 @@
 	<artifactId>mybatis-extender-parent</artifactId>
 	<version>1.0.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
+	<name>mybatis-extender-integrationtest</name>
+
+	<description>
+        osgi based mybatis following the extender pattern. Expose your mapper interfaces and get an implementation in return. Just like the guice or spring integrations.
+	</description>
+	<url>https://github.com/TDC-Netdesign/mybatis-extender/</url>
 
 	<licenses>
 		<license>
@@ -133,6 +139,32 @@
 		<url>https://github.com/TDC-Netdesign/mybatis-extender</url>
 		<tag>HEAD</tag>
 	</scm>
+
+	<developers>
+		<developer>
+			<roles>
+				<role>Architect</role>
+				<role>Developer</role>
+			</roles>
+			<id>nmw</id>
+			<name>Nino Martinez Wael</name>
+			<email>NMWA@tdc.dk</email>
+			<timezone>+1</timezone>
+			<organization>netdesign.dk</organization>
+			<organizationUrl>http://www.netdesign.dk</organizationUrl>
+		</developer>
+		<developer>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<id>mnn</id>
+			<name>Martin Nybo Nielsen</name>
+			<email>MNN@tdcnetdesign.dk</email>
+			<timezone>+1</timezone>
+			<organization>netdesign.dk</organization>
+			<organizationUrl>http://www.netdesign.dk</organizationUrl>
+		</developer>
+	</developers>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
