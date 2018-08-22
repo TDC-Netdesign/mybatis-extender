@@ -19,7 +19,6 @@ public class MybatisExtenderRuntime {
 
     @Activate
     public void activate(BundleContext ctx) throws InvalidSyntaxException {
-        System.out.print("Where are my logging!?");
         LOGGER.info("MybatisExtenderRuntime started");
         this.ctx=ctx;
         //dk.netdesign.mybatis.extender.api.MybatisConfiguration
