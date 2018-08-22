@@ -5,7 +5,7 @@
 	<artifactId>mybatis-extender-parent</artifactId>
 	<version>1.0.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	<name>mybatis-extender-integrationtest</name>
+	<name>mybatis-extender</name>
 
 	<description>
         osgi based mybatis following the extender pattern. Expose your mapper interfaces and get an implementation in return. Just like the guice or spring integrations.
