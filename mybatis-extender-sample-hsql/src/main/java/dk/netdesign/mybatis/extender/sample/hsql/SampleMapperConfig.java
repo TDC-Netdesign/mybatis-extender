@@ -65,10 +65,10 @@ public class SampleMapperConfig extends ScriptLoadingMigrationsConfiguration{
         return org.hsqldb.jdbcDriver.class;
     }
     
-//    @Override
-//    public Class<? extends MigrationCommands> getMigrationRemoteRegistrationType() {
-//        return SampleMigrationCommands.class;
-//    }
+    @Override
+    public Class<? extends MigrationCommands> getMigrationRemoteRegistrationType() {
+        return SampleMigrationCommands.class;
+    }
 
     @Override
     public void executeOnRegistration(MigrationCommands migrator) {

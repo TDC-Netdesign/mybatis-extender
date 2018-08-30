@@ -24,7 +24,7 @@ import org.apache.ibatis.migration.MigrationException;
  *
  * @author mnn
  */
-public interface MigrationCommands {
+public interface MigrationCommands{
     
     public void bootstrap() throws MigrationException;
     public void bootstrap(boolean force) throws MigrationException;

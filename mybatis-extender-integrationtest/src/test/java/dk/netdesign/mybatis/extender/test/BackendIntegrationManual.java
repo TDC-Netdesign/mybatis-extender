@@ -58,7 +58,6 @@ public class BackendIntegrationManual {
 
     @Test
     public void dontStopTillYouGetEnough() throws IOException {
-        System.out.println("ready and awaiting command!");
         System.in.read();
 
     }
