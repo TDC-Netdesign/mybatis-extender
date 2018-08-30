@@ -14,5 +14,8 @@ public interface SampleAnnotationMapper {
 
     @Select("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES")
     public List<String> getAllTables();
+    
+    @Select("SELECT DESCRIPTION FROM CHANGELOG")
+    public List<String> getChangeLog();
 
 }

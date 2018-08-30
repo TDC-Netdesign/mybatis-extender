@@ -34,9 +34,8 @@ public class Interceptor {
 
         SqlSession sqlSession = sqlSessionFactory.openSession();
         Object mapper = sqlSession.getMapper(originalClass);
-
         Method methodInstance = mapper.getClass().getDeclaredMethod(method.getName(),method.getParameterTypes());
-
+        
         Object invoke = methodInstance.invoke(mapper, args);
         sqlSession.commit();
         sqlSession.close();

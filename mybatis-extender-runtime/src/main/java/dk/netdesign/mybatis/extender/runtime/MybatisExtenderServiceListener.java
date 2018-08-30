@@ -1,22 +1,23 @@
 package dk.netdesign.mybatis.extender.runtime;
 
+import dk.netdesign.mybatis.extender.runtime.migrations.MigrationCommandsLayer;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import dk.netdesign.mybatis.extender.api.MigrationCommands;
+import dk.netdesign.mybatis.extender.api.MigrationConfiguration;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 import net.bytebuddy.dynamic.loading.MultipleParentClassLoader;
 import net.bytebuddy.implementation.MethodDelegation;
-import org.apache.ibatis.io.ClassLoaderWrapper;
-import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.mapping.Environment;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
-import org.apache.ibatis.type.TypeHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import dk.netdesign.mybatis.extender.api.MybatisConfiguration;
+import java.io.UnsupportedEncodingException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
@@ -25,8 +26,12 @@ import org.osgi.framework.ServiceRegistration;
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.logging.Level;
 
 import static net.bytebuddy.matcher.ElementMatchers.any;
 
@@ -38,20 +43,18 @@ public class MybatisExtenderServiceListener implements ServiceListener {
     private static final Logger LOGGER = LogManager.getLogger();
     private BundleContext ctx;
 
-    private MultipleParentClassLoader multipleParentClassLoader;
 
     private HashMap<MybatisConfiguration, List<ServiceRegistration<?>>> serviceRegistry = new HashMap<>();
 
     public MybatisExtenderServiceListener(BundleContext ctx) {
 
         this.ctx = ctx;
-        multipleParentClassLoader = new MultipleParentClassLoader(Arrays.asList(this.getClass().getClassLoader()));
 
     }
 
     @Override
     public void serviceChanged(ServiceEvent serviceEvent) {
-        LOGGER.info("got service event {}", serviceEvent.getType());
+        LOGGER.debug("got service event {}", serviceEvent.getType());
 
         MybatisConfiguration service = (MybatisConfiguration) ctx.getService(serviceEvent.getServiceReference());
 
@@ -106,14 +109,44 @@ public class MybatisExtenderServiceListener implements ServiceListener {
                 interceptorList.stream().forEach(interceptor -> interceptor.setSqlSessionFactory(sqlSessionFactory));
 
                 List<ServiceRegistration<?>> serviceRegistrationList = new ArrayList<>();
+                Dictionary serviceProperties = new Hashtable();
+                serviceProperties.put(MybatisConfiguration.CONFIGURATION_CLASS, service.getClass().getCanonicalName());
+                    
+                
+                
+                
+                if (service instanceof MigrationConfiguration) {
+
+                    MigrationConfiguration migrationConfig = (MigrationConfiguration) service;
+                    LOGGER.info("Registering MigrationCommands under service {}", migrationConfig.getMigrationRemoteRegistrationType().getCanonicalName());
+                    Collection<Exception> exceptionReturnList = migrationConfig.getExceptionHolder();
+                    try {
+                        MigrationCommands migrationRemote = new MigrationCommandsLayer(sqlSessionFactory, migrationConfig);
+                        String[] migrationCommandsServiceClasses;
+                        if (migrationConfig.getMigrationRemoteRegistrationType().equals(MigrationCommands.class)) {
+                            migrationCommandsServiceClasses = new String[]{MigrationCommands.class.getCanonicalName()};
+                        } else {
+                            migrationCommandsServiceClasses = new String[]{MigrationCommands.class.getCanonicalName(), migrationConfig.getMigrationRemoteRegistrationType().getCanonicalName()};
+                        }
+                        ServiceRegistration commandsRegistration = ctx.registerService(migrationCommandsServiceClasses, migrationRemote, serviceProperties);
+                        serviceRegistrationList.add(commandsRegistration);
+
+                        migrationConfig.executeOnRegistration(migrationRemote);
+                    } catch (UnsupportedEncodingException | RuntimeException ex) {
+                        if (exceptionReturnList != null) {
+                            exceptionReturnList.add(ex);
+                        }
+                        LOGGER.error("Exception occured when executing Migration setup", ex);
+                    }
+
+                }
                 proxyMappers.forEach(o -> {
                     Class[] implementedInterfaces = o.getClass().getInterfaces();
-                    LOGGER.info("class implements {} interfaces, interfaces are {}", implementedInterfaces.length, implementedInterfaces.toString());
-                    ServiceRegistration<?> serviceRegistration = ctx.registerService(implementedInterfaces[0].getCanonicalName(), o, null);
+                    LOGGER.info("class implements {} interfaces, interfaces are {}", implementedInterfaces.length, Arrays.asList(implementedInterfaces).toString());
+                    ServiceRegistration<?> serviceRegistration = ctx.registerService(implementedInterfaces[0].getCanonicalName(), o, serviceProperties);
                     serviceRegistrationList.add(serviceRegistration);
-                    LOGGER.info("registerered {} as service {}", o.getClass().getCanonicalName(), implementedInterfaces[0].getClass().getCanonicalName());
+                    LOGGER.info("registerered {} as service {}", o.getClass().getCanonicalName(), implementedInterfaces[0].getCanonicalName());
                 });
-                ;
                 serviceRegistry.put(service, serviceRegistrationList);
 
 

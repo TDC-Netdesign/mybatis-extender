@@ -9,6 +9,7 @@ import java.util.Map;
  * Created by nino on 09-04-2017.
  */
 public interface MybatisConfiguration {
+    public static final String CONFIGURATION_CLASS="configurationClass";
 
     /**
      *

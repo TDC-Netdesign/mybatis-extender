@@ -21,6 +21,7 @@ import shaded.org.apache.http.protocol.HttpContext;
 
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.repositories;
+import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.*;
 
 @RunWith(PaxExam.class)
@@ -36,7 +37,7 @@ public class BackendIntegrationManual {
 
 
 
-
+                KarafDistributionOption.debugConfiguration("5005", false),
                 karafDistributionConfiguration().frameworkUrl(maven().groupId("org.apache.karaf").artifactId("apache-karaf")
                         .type("zip").version("4.0.9"))
                         .unpackDirectory(new File("target/paxexam/unpack/"))
@@ -48,7 +49,7 @@ public class BackendIntegrationManual {
                 features(
                         maven().groupId("dk.netdesign")
                                 .artifactId("mybatis-extender-feature").type("xml")
-                                .classifier("features").version("1.0-SNAPSHOT")
+                                .classifier("features").versionAsInProject()
                        ,"mybatis-extender","mybatis-extender-sample","webconsole"),
         }
                 ;
@@ -57,7 +58,7 @@ public class BackendIntegrationManual {
 
     @Test
     public void dontStopTillYouGetEnough() throws IOException {
-        System.out.print("ready and awaiting command!");
+        System.out.println("ready and awaiting command!");
         System.in.read();
 
     }

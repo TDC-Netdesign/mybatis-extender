@@ -21,14 +21,11 @@ public class SampleComponentConsumer {
 
     @Activate
     public void activate() {
-
-        LOGGER.info("Got getSampleAnnotationMapper, saying hello {}", getSampleAnnotationMapper().sayHello());
-
         //Just for fun printing all default tables:
 
         LOGGER.info("Got getSampleAnnotationMapper, saying hello {}", getSampleAnnotationMapper().sayHello());
         getSampleAnnotationMapper().getAllTables().stream().forEach(table -> LOGGER.info("found table {}", table));
-
+        getSampleAnnotationMapper().getChangeLog().stream().forEach(table -> LOGGER.info("changelog entry {}", table));
 
         LOGGER.info("Got getSampleXMLBasedMapper, saying hello {}", getSampleXMLBasedMapper().sayHello());
         getSampleXMLBasedMapper().getAllTables().stream().forEach(table -> LOGGER.info("found table {}", table));

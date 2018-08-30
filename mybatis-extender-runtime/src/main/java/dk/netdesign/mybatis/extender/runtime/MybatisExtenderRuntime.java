@@ -1,5 +1,6 @@
 package dk.netdesign.mybatis.extender.runtime;
 
+import dk.netdesign.mybatis.extender.api.MigrationConfiguration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import dk.netdesign.mybatis.extender.api.MybatisConfiguration;
@@ -23,7 +24,7 @@ public class MybatisExtenderRuntime {
         this.ctx=ctx;
         //dk.netdesign.mybatis.extender.api.MybatisConfiguration
 
-        String filter = "("+Constants.OBJECTCLASS+"=" + MybatisConfiguration.class.getName() + ")";
+        String filter = "(|("+Constants.OBJECTCLASS+"=" + MybatisConfiguration.class.getName() + ")("+Constants.OBJECTCLASS+"=" + MigrationConfiguration.class.getName() + "))";
         MybatisExtenderServiceListener mybatisExtenderServiceListener = new MybatisExtenderServiceListener(ctx);
         ctx.addServiceListener(mybatisExtenderServiceListener, filter);
 

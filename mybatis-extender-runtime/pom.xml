@@ -34,9 +34,12 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <scope>provided</scope>
-            <version>2.4.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-iostreams</artifactId>
+        </dependency>
+
 
         <dependency>
             <groupId>junit</groupId>
@@ -53,8 +56,10 @@
         <dependency>
             <groupId>org.mybatis</groupId>
             <artifactId>mybatis</artifactId>
-            <version>3.4.4</version>
-            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis-migrations</artifactId>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
@@ -90,6 +95,7 @@
                             org.apache.logging.log4j; version="2,3)"; provider=paxlogging,
                             *
                         </Import-Package>
+                        <Export-Package>org.apache.ibatis.migration;org.apache.ibatis.migration.commands;org.apache.ibatis.migration.hook;org.apache.ibatis.migration.operations;org.apache.ibatis.migration.options;org.apache.ibatis.migration.utils</Export-Package>
 
                     </instructions>
 
