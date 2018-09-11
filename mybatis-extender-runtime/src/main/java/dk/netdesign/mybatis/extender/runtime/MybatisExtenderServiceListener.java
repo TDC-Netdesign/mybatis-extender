@@ -194,7 +194,7 @@ public class MybatisExtenderServiceListener implements ServiceListener, Closeabl
                             serviceRegistration.unregister();
                             LOGGER.info("unregistering {}", service.getClass().getCanonicalName());
                         } catch (RuntimeException ex) {
-                            LOGGER.error(" caugth an RuntimeException {}, unregistering {}", service.getClass().getCanonicalName());
+                            LOGGER.error(" caught an RuntimeException {}, unregistering {}", service.getClass().getCanonicalName());
                         }
                     }
             );
