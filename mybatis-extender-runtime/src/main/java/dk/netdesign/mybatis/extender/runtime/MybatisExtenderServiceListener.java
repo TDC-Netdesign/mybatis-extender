@@ -38,18 +38,16 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.logging.Level;
 
 import static net.bytebuddy.matcher.ElementMatchers.any;
 
 /**
  * Created by nmw on 27-04-2017.
  */
-public class MybatisExtenderServiceListener implements ServiceListener {
+public class MybatisExtenderServiceListener implements ServiceListener, Closeable {
 
     private static final Logger LOGGER = LogManager.getLogger();
     private BundleContext ctx;
-
 
     private final HashMap<MybatisConfiguration, List<ServiceRegistration<?>>> serviceRegistry = new HashMap<>();
     private final HashMap<MybatisConfiguration, MybatisCommandsInvocationHandler> configurations = new HashMap<>();
@@ -70,137 +68,158 @@ public class MybatisExtenderServiceListener implements ServiceListener {
 
             case ServiceEvent.REGISTERED:
                 //Register mappers
+                Environment environment = null;
+                try {
 
+                    List<Interceptor> interceptorList = new ArrayList<>();
+                    environment = buildEnvironment(service);
+                    final Configuration configuration = new Configuration(environment);
 
-                List<Interceptor> interceptorList = new ArrayList<>();
-                Environment environment = buildEnvironment(service);
-                final Configuration configuration = new Configuration(environment);
-
-                if (service.getMappers().size() > 0) {
-                    //setup mybatis context
-                    if (service.getTypeHandlers() != null) {
-                        service.getTypeHandlers().entrySet().forEach(classTypeHandlerEntry -> {
-                                    configuration.getTypeHandlerRegistry().register(classTypeHandlerEntry.getKey(), classTypeHandlerEntry.getValue());
-                                }
-
-                        );
+                    if (service.getMappers().size() > 0) {
+                        //setup mybatis context
+                        if (service.getTypeHandlers() != null) {
+                            service.getTypeHandlers().entrySet().forEach(classTypeHandlerEntry -> {
+                                configuration.getTypeHandlerRegistry().register(classTypeHandlerEntry.getKey(), classTypeHandlerEntry.getValue());
+                            }
+                            );
+                        }
                     }
-                }
-                List<Object> proxyMappers = new ArrayList<>();
-                ClassLoader multiClassLoader = new MultipleParentClassLoader(Arrays.asList(service.getClass().getClassLoader(), this.getClass().getClassLoader()));
-                for (Class clazz : service.getMappers()) {
-                    LOGGER.info("registering {}", clazz.getCanonicalName());
-                    configuration.addMapper(clazz);
+                    List<Object> proxyMappers = new ArrayList<>();
+                    ClassLoader multiClassLoader = new MultipleParentClassLoader(Arrays.asList(service.getClass().getClassLoader(), this.getClass().getClassLoader()));
+                    for (Class clazz : service.getMappers()) {
+                        LOGGER.info("registering {}", clazz.getCanonicalName());
+                        configuration.addMapper(clazz);
 
-                    ByteBuddy bb = new ByteBuddy();
+                        ByteBuddy bb = new ByteBuddy();
 
-                    Interceptor interceptor = null;
-                    interceptor = new Interceptor(clazz);
-                    interceptorList.add(interceptor);
-                    Class<?> clz = bb.subclass(clazz).name("MybatisExtenderRuntime_" + clazz.getName())
-                            .method(any()).intercept(MethodDelegation.to(interceptor))
-                            .make()
-                            .load(multiClassLoader, ClassLoadingStrategy.Default.WRAPPER)
-                            .getLoaded();
-                    try {
+                        Interceptor interceptor = null;
+                        interceptor = new Interceptor(clazz);
+                        interceptorList.add(interceptor);
+                        Class<?> clz = bb.subclass(clazz).name("MybatisExtenderRuntime_" + clazz.getName())
+                                .method(any()).intercept(MethodDelegation.to(interceptor))
+                                .make()
+                                .load(multiClassLoader, ClassLoadingStrategy.Default.WRAPPER)
+                                .getLoaded();
+
                         Object test = clz.newInstance();
                         proxyMappers.add(test);
-                    } catch (InstantiationException e) {
-                        LOGGER.error(e);
-                    } catch (IllegalAccessException e) {
-                        LOGGER.error(e);
+
                     }
-                }
-                SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
+                    SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
 
+                    interceptorList.stream().forEach(interceptor -> interceptor.setSqlSessionFactory(sqlSessionFactory));
 
-                interceptorList.stream().forEach(interceptor -> interceptor.setSqlSessionFactory(sqlSessionFactory));
+                    List<ServiceRegistration<?>> serviceRegistrationList = new ArrayList<>();
+                    Dictionary serviceProperties = new Hashtable();
+                    serviceProperties.put(MybatisConfiguration.CONFIGURATION_CLASS, service.getClass().getCanonicalName());
 
-                List<ServiceRegistration<?>> serviceRegistrationList = new ArrayList<>();
-                Dictionary serviceProperties = new Hashtable();
-                serviceProperties.put(MybatisConfiguration.CONFIGURATION_CLASS, service.getClass().getCanonicalName());
-                    
-                List<Class<?>> cmdServiceClasses = new ArrayList<>();
-                cmdServiceClasses.add(MybatisCommands.class);
-                
-                
-                MigrationCommandsLayer migrationRemote = null;
-                
-                if (service instanceof MigrationConfiguration) {
+                    List<Class<?>> cmdServiceClasses = new ArrayList<>();
+                    cmdServiceClasses.add(MybatisCommands.class);
 
-                    MigrationConfiguration migrationConfig = (MigrationConfiguration) service;
-                    LOGGER.info("Registering MigrationCommands under service {}", migrationConfig.getMigrationRemoteRegistrationType().getCanonicalName());
-                    Collection<Exception> exceptionReturnList = migrationConfig.getExceptionHolder();
-                    try {
-                        migrationRemote = new MigrationCommandsLayer(sqlSessionFactory, migrationConfig);
-                        cmdServiceClasses.add(MigrationCommands.class);
-                        if (!migrationConfig.getMigrationRemoteRegistrationType().equals(MigrationCommands.class)) {
-                            cmdServiceClasses.add(migrationConfig.getMigrationRemoteRegistrationType());
+                    MigrationCommandsLayer migrationRemote = null;
+
+                    if (service instanceof MigrationConfiguration) {
+
+                        MigrationConfiguration migrationConfig = (MigrationConfiguration) service;
+                        LOGGER.info("Registering MigrationCommands under service {}", migrationConfig.getMigrationRemoteRegistrationType().getCanonicalName());
+                        Collection<Exception> exceptionReturnList = migrationConfig.getExceptionHolder();
+                        try {
+                            migrationRemote = new MigrationCommandsLayer(sqlSessionFactory, migrationConfig);
+                            cmdServiceClasses.add(MigrationCommands.class);
+                            if (!migrationConfig.getMigrationRemoteRegistrationType().equals(MigrationCommands.class)) {
+                                cmdServiceClasses.add(migrationConfig.getMigrationRemoteRegistrationType());
+                            }
+
+                            migrationConfig.executeOnRegistration(migrationRemote);
+                        } catch (UnsupportedEncodingException | RuntimeException ex) {
+                            if (exceptionReturnList != null) {
+                                exceptionReturnList.add(ex);
+                            }
+                            throw ex;
                         }
-                        
 
-                        migrationConfig.executeOnRegistration(migrationRemote);
-                    } catch (UnsupportedEncodingException | RuntimeException ex) {
-                        if (exceptionReturnList != null) {
-                            exceptionReturnList.add(ex);
-                        }
-                        LOGGER.error("Exception occured when executing Migration setup", ex);
                     }
 
-                }
-                
-                MybatisCommandsInvocationHandler handler = new MybatisCommandsInvocationHandler(service, configuration, migrationRemote);
-                configurations.put(service, handler);
-                
-                ServiceRegistration commandsRegistration = ctx.registerService(getNamesFromClasses(cmdServiceClasses), Proxy.newProxyInstance(multiClassLoader, cmdServiceClasses.toArray(new Class[cmdServiceClasses.size()]), handler), serviceProperties);
-                serviceRegistrationList.add(commandsRegistration);
-                
-                proxyMappers.forEach(o -> {
-                    Class[] implementedInterfaces = o.getClass().getInterfaces();
-                    LOGGER.info("class implements {} interfaces, interfaces are {}", implementedInterfaces.length, Arrays.asList(implementedInterfaces).toString());
-                    ServiceRegistration<?> serviceRegistration = ctx.registerService(implementedInterfaces[0].getCanonicalName(), o, serviceProperties);
-                    serviceRegistrationList.add(serviceRegistration);
-                    LOGGER.info("registerered {} as service {}", o.getClass().getCanonicalName(), implementedInterfaces[0].getCanonicalName());
-                });
-                serviceRegistry.put(service, serviceRegistrationList);
+                    MybatisCommandsInvocationHandler handler = new MybatisCommandsInvocationHandler(service, configuration, migrationRemote);
+                    configurations.put(service, handler);
 
+                    ServiceRegistration commandsRegistration = ctx.registerService(getNamesFromClasses(cmdServiceClasses), Proxy.newProxyInstance(multiClassLoader, cmdServiceClasses.toArray(new Class[cmdServiceClasses.size()]), handler), serviceProperties);
+                    serviceRegistrationList.add(commandsRegistration);
+
+                    proxyMappers.forEach(o -> {
+                        Class[] implementedInterfaces = o.getClass().getInterfaces();
+                        LOGGER.info("class implements {} interfaces, interfaces are {}", implementedInterfaces.length, Arrays.asList(implementedInterfaces).toString());
+                        ServiceRegistration<?> serviceRegistration = ctx.registerService(implementedInterfaces[0].getCanonicalName(), o, serviceProperties);
+                        serviceRegistrationList.add(serviceRegistration);
+                        LOGGER.info("registerered {} as service {}", o.getClass().getCanonicalName(), implementedInterfaces[0].getCanonicalName());
+                    });
+                    serviceRegistry.put(service, serviceRegistrationList);
+                } catch (InstantiationException | IllegalAccessException | UnsupportedEncodingException | RuntimeException ex) {
+                    LOGGER.error("An error occurred when registering service", ex);
+                    if (environment != null) {
+                        try {
+                            closeDataSource(environment.getDataSource());
+                        } catch (IOException ex1) {
+                            LOGGER.error("Failed to close " + environment.getDataSource(), ex1);
+                        }
+                    }
+                    removeService(service);
+                }
                 break;
             case ServiceEvent.UNREGISTERING:
-                //Unregister mappers
-                serviceRegistry.remove(service).stream().forEach(
-                        serviceRegistration -> {
-                            try {
-                                serviceRegistration.unregister();
-                                LOGGER.info("unregistering {}", service.getClass().getCanonicalName());
-                            } catch (RuntimeException ex) {
-                                LOGGER.error(" caugth an RuntimeException {}, unregistering {}", service.getClass().getCanonicalName());
-                            }
-                        }
-                );
-        {
-            try {
-                configurations.remove(service).close();
-            } catch (IOException ex) {
-                LOGGER.error("Could not close DataSource when unregistering service "+service, ex);
-            }
-        }
-
-
+                removeService(service);
                 break;
         }
 
+    }
 
+    @Override
+    public void close() throws IOException {
+        List<MybatisConfiguration> configurationsToClose = new ArrayList<>(serviceRegistry.keySet());
+        configurationsToClose.addAll(configurations.keySet());
+        for(MybatisConfiguration configToClose : configurationsToClose){
+            removeService(configToClose);
+        }
     }
     
-    private String[] getNamesFromClasses(List<Class<?>> classList){
+    
+
+    private void removeService(MybatisConfiguration service) {
+        //Unregister mappers
+        List<ServiceRegistration<?>> services = serviceRegistry.remove(service);
+        if (services != null) {
+            services.stream().forEach(
+                    serviceRegistration -> {
+                        try {
+                            serviceRegistration.unregister();
+                            LOGGER.info("unregistering {}", service.getClass().getCanonicalName());
+                        } catch (RuntimeException ex) {
+                            LOGGER.error(" caugth an RuntimeException {}, unregistering {}", service.getClass().getCanonicalName());
+                        }
+                    }
+            );
+        }
+
+        try {
+            MybatisCommandsInvocationHandler handler = configurations.remove(service);
+            if (handler != null) {
+                handler.close();
+            }
+        } catch (IOException ex) {
+            LOGGER.error("Could not close DataSource when unregistering service " + service, ex);
+        }
+
+    }
+
+    private String[] getNamesFromClasses(List<Class<?>> classList) {
         String[] strings = new String[classList.size()];
-        for(int i = 0 ; i < strings.length ; i++){
+        for (int i = 0; i < strings.length; i++) {
             strings[i] = classList.get(i).getCanonicalName();
         }
         return strings;
     }
-    
-    private Environment buildEnvironment(MybatisConfiguration service){
+
+    private Environment buildEnvironment(MybatisConfiguration service) {
         return new Environment(service.getClass().getCanonicalName(), new JdbcTransactionFactory(), buildDataSource(service));
     }
 
@@ -217,7 +236,7 @@ public class MybatisExtenderServiceListener implements ServiceListener {
         HikariDataSource ds = new HikariDataSource(config);
         return ds;
     }
-    
+
     protected class MybatisCommandsInvocationHandler implements InvocationHandler, MybatisCommands, Closeable {
 
         private final MybatisConfiguration service;
@@ -246,9 +265,9 @@ public class MybatisExtenderServiceListener implements ServiceListener {
                 } else {
                     throw new UnsupportedOperationException(method + " is unknown to this InvocationHandler");
                 }
-            }catch(InvocationTargetException ex){
+            } catch (InvocationTargetException ex) {
                 throw ex.getCause();
-            } 
+            }
         }
 
         @Override
@@ -263,7 +282,7 @@ public class MybatisExtenderServiceListener implements ServiceListener {
             Environment current = mybatisConfiguration.getEnvironment();
             closeDataSource(current.getDataSource());
         }
-        
+
         private boolean containsMethod(Class toSearch, Method toFind) {
             methodloop:
             for (Method method : toSearch.getDeclaredMethods()) {
@@ -283,12 +302,12 @@ public class MybatisExtenderServiceListener implements ServiceListener {
             }
             return false;
         }
-        
-        private void closeDataSource(DataSource source) throws IOException{
-            if(source != null && source instanceof Closeable){
-                ((Closeable)source).close();
-            }
-        }
 
+    }
+
+    private void closeDataSource(DataSource source) throws IOException {
+        if (source != null && source instanceof Closeable) {
+            ((Closeable) source).close();
+        }
     }
 }
